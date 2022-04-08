@@ -1,15 +1,34 @@
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
+from shapely import affinity
+import os
+angolo_x=10
+angolo_y= 10
+posizione_macchina=(10,10)
+vbs = Point (posizione_macchina[0]-angolo_x, posizione_macchina[1])
+vbd = Point (posizione_macchina[0]+angolo_x, posizione_macchina[1])
+vas = Point (posizione_macchina[0]-angolo_x, posizione_macchina[1]+angolo_y)
+vad = Point (posizione_macchina[0]+angolo_x, posizione_macchina[1]+angolo_y)
+rettangolo = Polygon([[p.x, p.y] for p in [vbs,vas,vad,vbd]]) 
+ruotato= affinity.rotate(rettangolo, 180, 'center')
+print(rettangolo.boundary)
+print(ruotato.boundary)
 
-def cv(pose,landmarks):
-    angolo_x=6
-    angolo_y= 11
+def cv(landmarks):
+    
     for x in range(len(landmarks)):
-        if landmarks[x][0] in range(pose[0]-angolo_x,pose[0]+angolo_x) and landmarks[x][1] in  range(pose[1]+1,pose[1]+angolo_y):
+        #print(landmarks[x])
+        if rettangolo.contains(landmarks[x]) :
             print(landmarks[x])
+
+
 def carica_file(lista):
-    file_coni = open("C:\\Users\\Tano\\Desktop\\visione\\posizione.txt")
+    location_coni = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    file_coni = open(os.path.join(location_coni, 'posizione.txt'))
     for line in file_coni:
         line2 = file_coni.readline()
-        lista.append((int(line), int(line2)))
+        cono = Point(int(line), int(line2))
+        lista.append(cono)
         if 'str' in line:
             break
     file_coni.close()
@@ -19,8 +38,6 @@ def carica_file(lista):
 ##MAIN##
 coni = []
 carica_file(coni)
-posizione_macchina=(10,10)
-print(coni[0])
-cv(posizione_macchina,coni)
+cv(coni)
 
 
