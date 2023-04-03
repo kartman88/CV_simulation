@@ -1,15 +1,32 @@
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
+from shapely import affinity
+import os
+ANGOLO_X=10
+ANGOLO_Y= 10
+posizione_macchina= Point(10,10)
+orientamento_macchina = 0
+vas = Point (posizione_macchina.x-ANGOLO_X, posizione_macchina.y+ANGOLO_Y)
+vad = Point (posizione_macchina.x+ANGOLO_X, posizione_macchina.y+ANGOLO_Y)
+triangolo = Polygon([[p.x, p.y] for p in [posizione_macchina, vas, vad]]) #i punti del poligono vano messi in ordine in cui va disegnato
+ruotato= affinity.rotate(triangolo, orientamento_macchina, posizione_macchina)  #l'angolo di rotazione ruota in senso antiorario
+print(triangolo.boundary)
+print(ruotato.boundary)
 
-def cv(pose,landmarks):
-    angolo_x=6
-    angolo_y= 11
+def cv(landmarks): #funzione che controlla se un cono si trova all'interno del triangolo di visione 
+    
     for x in range(len(landmarks)):
-        if landmarks[x][0] in range(pose[0]-angolo_x,pose[0]+angolo_x) and landmarks[x][1] in  range(pose[1]+1,pose[1]+angolo_y):
-            print(landmarks[x])
-def carica_file(lista):
-    file_coni = open("C:\\Users\\Tano\\Desktop\\visione\\posizione.txt")
+        if triangolo.contains(landmarks[x]) :
+            print("Vedo i coni in posizione:\n", landmarks[x], "\n")
+
+
+def carica_file(lista): #funzione per caricare dal file la lista dei coni
+    location_coni = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    file_coni = open(os.path.join(location_coni, 'posizione.txt'))
     for line in file_coni:
         line2 = file_coni.readline()
-        lista.append((int(line), int(line2)))
+        cono = Point(int(line), int(line2))
+        lista.append(cono)
         if 'str' in line:
             break
     file_coni.close()
@@ -19,8 +36,6 @@ def carica_file(lista):
 ##MAIN##
 coni = []
 carica_file(coni)
-posizione_macchina=(10,10)
-print(coni[0])
-cv(posizione_macchina,coni)
+cv(coni)
 
 
